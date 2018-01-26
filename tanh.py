@@ -8,7 +8,6 @@ import numpy as np
 import _pickle as pickle
 import pprint
 import sys
-import math
 
 
 import matplotlib.pyplot as plt #matplotlib is for graphing
@@ -18,13 +17,14 @@ np.random.seed(10)
 
 hl_size = 100 #hidden layer size
 version = 1
-npop = 25 # number of episodes 
+npop = 100 # number of episodes 
 sigma = 0.1
 alpha = 0.03
 iter_num = 300
 aver_reward = None
 allow_writing = True
 reload = False # reload = True basically loads a pre-made (and pretty good) model - it's supposed to be kind of a demo
+iterations = 1000
 
 #graphing set up
 areward = []
@@ -41,15 +41,12 @@ else: # creates new, random model
     model['W1'] = np.random.randn(24, hl_size) / np.sqrt(24) # input-hiddenlayer ... 24 x hl_size
     model['W2'] = np.random.randn(hl_size, 4) / np.sqrt(hl_size) # hiddenlayer-output
 
-def sigmoid(x):
-  return 1 / (1 + np.exp(-x))
-
 def get_action(state, model):
     #print(state)
     hl = np.matmul(state, model['W1'])
-    hl = sigmoid(hl) # hyperbolic tan -- super high corrections when far from 1, at about 0.9 corrections are miniscule
+    hl = np.tanh(hl) # hyperbolic tan -- super high corrections when far from 1, at about 0.9 corrections are miniscule
     action = np.matmul(hl, model['W2'])
-    action = sigmoid(action)
+    action = np.tanh(action)
     #env.render()
     return action
 
@@ -74,7 +71,7 @@ if reload:
         print(f(model, True))
     sys.exit('demo finished') # quits running program when demo is over
 
-for i in range(10001):
+for i in range(iterations):
     N = {}
     for k, v in model.items():
         N[k] = np.random.randn(npop, v.shape[0], v.shape[1])
@@ -98,11 +95,11 @@ for i in range(10001):
     #Code for graphing
     areward.append(aver_reward)
     
-    if i == 100:
+    if i == iterations-1:
         iters = [j for j in range(len(areward))]
         print(iters)
         plt.scatter(iters,areward, np.pi * 8, 'blue', alpha=0.5)
-        plt.show()
+        plt.savefig('tanh')
 
     #End of graphing code
     if i % 10 == 0 and allow_writing:
